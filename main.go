@@ -6,9 +6,7 @@ import (
 	"github.com/ysugimoto/go-cliargs"
 	"golang.org/x/net/websocket"
 	"net/http"
-	"net/url"
 	"os"
-	"strings"
 )
 
 type AppHandler struct {
@@ -22,8 +20,8 @@ func (a *AppHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	case "/remote":
 		a.handleRemoteRequest(resp, req)
 		return
-	case "/proxy":
-		handler = createProxyClient(a)
+	//case "/proxy":
+	//	handler = createProxyClient(a)
 	default:
 		handler = createReader(a)
 	}
@@ -52,20 +50,6 @@ func (a *AppHandler) Broadcast(line string) {
 	}
 }
 
-func sendRemote(proxyURL, message string) {
-	post := url.Values{}
-	post.Add("message", message)
-	request, _ := http.NewRequest(
-		"POST",
-		proxyURL,
-		strings.NewReader(post.Encode()),
-	)
-	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	client := &http.Client{}
-	response, _ := client.Do(request)
-	response.Body.Close()
-}
-
 func main() {
 	args := cliarg.NewArguments()
 	args.Alias("", "stdin", nil)
@@ -74,13 +58,17 @@ func main() {
 	args.Alias("", "proxy-server", nil)
 	args.Parse()
 
+	var r *Remote
+	if proxy, _ := args.GetOptionAsString("proxy"); proxy != "" {
+		r = &Remote{URL: proxy}
+	}
+
 	if _, ok := args.GetOption("stdin"); ok {
 		fmt.Println("Read from stdin")
 		scanner := bufio.NewScanner(os.Stdin)
-		proxy, _ := args.GetOptionAsString("proxy")
 		for scanner.Scan() {
-			if proxy != "" {
-				sendRemote(proxy, scanner.Text())
+			if r != nil {
+				r.Send(scanner.Text())
 			} else {
 				os.Stdout.WriteString(scanner.Text() + "\n")
 			}
@@ -93,7 +81,11 @@ func main() {
 	}
 	if _, ok := args.GetOption("proxy-server"); !ok {
 		file, _ := args.GetCommandAt(1)
-		go startTail(file, app.Broadcast)
+		if r != nil {
+			go startTail(file, r.Send)
+		} else {
+			go startTail(file, app.Broadcast)
+		}
 	}
 
 	http.Handle("/", app)
