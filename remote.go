@@ -1,17 +1,27 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 )
 
+// Remote request struct
+// support message queueing
 type Remote struct {
-	URL       string
-	queue     []string
+
+	// Request URL
+	URL string
+
+	// Queueing message stack
+	queue []string
+
+	// State of request is sending
 	isSending bool
 }
 
+// Send the message to server
 func (r *Remote) Send(message string) {
 	if r.isSending {
 		r.queue = append(r.queue, message)
@@ -25,14 +35,17 @@ func (r *Remote) Send(message string) {
 		}
 	}()
 	post := url.Values{}
-	post.Add("mesage", message)
+	post.Set("message", message)
 	request, _ := http.NewRequest(
 		"POST",
-		r.URL,
+		fmt.Sprintf("%s/remote", r.URL),
 		strings.NewReader(post.Encode()),
 	)
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	client := &http.Client{}
-	response, _ := client.Do(request)
-	response.Body.Close()
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer response.Body.Close()
 }
