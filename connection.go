@@ -25,9 +25,11 @@ func NewConnection(connType int, conn *websocket.Conn) *Connection {
 	hash := sha1.Sum([]byte(fmt.Sprint(time.Now().UnixNano())))
 
 	return &Connection{
-		Type: connType,
-		Id:   hex.EncodeToString(hash[:len(hash)]),
-		conn: conn,
+		Type:      connType,
+		Id:        hex.EncodeToString(hash[:len(hash)]),
+		conn:      conn,
+		OnClose:   func() {},
+		OnMessage: func(message string) {},
 	}
 }
 
@@ -40,11 +42,12 @@ func (c *Connection) Send(message string) {
 }
 
 func (c *Connection) Poll() {
-	var msg string
 	for {
-		if err := websocket.Message.Receive(c.conn, &msg); err != nil {
-			break
+		var msg string
+		if err := websocket.Message.Receive(c.conn, &msg); err == nil {
+			c.OnMessage(msg)
 		} else {
+			break
 		}
 	}
 }

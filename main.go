@@ -56,7 +56,23 @@ func main() {
 	args.Alias("", "proxy", "")
 	args.Alias("p", "port", "9000")
 	args.Alias("", "proxy-server", nil)
+	args.Alias("h", "help", nil)
+	args.Alias("c", "client", "")
 	args.Parse()
+
+	if _, ok := args.GetOption("help"); ok {
+		showUsage()
+		os.Exit(0)
+	}
+
+	if c, _ := args.GetOptionAsString("client"); c != "" {
+		if client, err := NewClient(c); err != nil {
+			fmt.Println(err)
+		} else {
+			client.Listen()
+		}
+		return
+	}
 
 	var r *Remote
 	if proxy, _ := args.GetOptionAsString("proxy"); proxy != "" {
@@ -76,6 +92,11 @@ func main() {
 		return
 	}
 
+	if args.GetCommandSize() == 0 {
+		showUsage()
+		os.Exit(0)
+	}
+
 	app := &AppHandler{
 		connections: make(map[string]*Connection),
 	}
@@ -89,8 +110,24 @@ func main() {
 	}
 
 	http.Handle("/", app)
-	if err := http.ListenAndServe(":9000", nil); err != nil {
+	port, _ := args.GetOptionAsInt("port")
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
 		panic(err)
 	}
+}
 
+func showUsage() {
+	help := `========================================
+tailor: the realtime logging transporter
+========================================
+Usage:
+  $ tailor [options] file
+
+Options
+  -p, --port        : Listen port number if works server
+  -h, --help        : Show this help
+      --stdin       : Get data from stdin
+      --proxy       : Send data to proxy server
+      --proxy-server: Work with proxy-server`
+	fmt.Println(help)
 }
