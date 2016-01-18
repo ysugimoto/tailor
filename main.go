@@ -139,17 +139,17 @@ func main() {
 	// Tailing file
 	file, _ := args.GetCommandAt(1)
 	if r != nil {
-		go startTail(file, r.Send)
+		startTail(file, r.Send)
 	} else {
 		go startTail(file, app.Broadcast)
+		// serving HTTP
+		http.Handle("/", app)
+		port, _ := args.GetOptionAsInt("port")
+		if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
+			panic(err)
+		}
 	}
 
-	// serving HTTP
-	http.Handle("/", app)
-	port, _ := args.GetOptionAsInt("port")
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
-		panic(err)
-	}
 }
 
 // Show usage
