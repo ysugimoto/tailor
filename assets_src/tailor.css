@@ -1,0 +1,141 @@
+body, h1, p, ul, li {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+.T-Window {
+    width: 100%;
+    height: 100%;
+}
+.T-Header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background-color: #000;
+    box-shadow: 1px 1px 10px #000;
+}
+.T-Title {
+    color: #fff;
+    padding: 6px 10px;
+    font-size: 18px;
+    letter-spacing: 1px;
+    margin-top: 2px;
+    margin-left: 8px;
+}
+.T-Indicator {
+    position: absolute;
+    right: 20px;
+    top: 12px;
+    color: #fff;
+    font-size: 12px;
+}
+.T-Indicator:before {
+    content: "";
+    display: inline-block;
+    border: solid 2px #eee;
+    background-color: #999;
+    width: 10px;
+    height: 10px;
+    vertical-align: text-bottom;
+    margin-right: 6px;
+    border-radius: 100%;
+}
+.T-Indicator.e:before {
+    background-color: #c00;
+}
+.T-Indicator.c:before {
+    background-color: #0ff;
+}
+.T-Main {
+    width: 100%;
+    height: 100%;
+    padding-top: 40px;
+    font-size: .9em;
+}
+.T-Main:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+.T-Sidebar {
+    height: 100%;
+    float: left;
+    width: 260px;
+    background-color: #ddd;
+    box-sizing: border-box;
+}
+.T-LogList {
+    border: solid 1px #ccc;
+}
+.T-LogList li {
+    list-style: none outside;
+    border-bottom: solid 1px #ccc;
+}
+.T-LogList li:last-child {
+    border-bottom: none;
+}
+.T-LogList li > a {
+    font-size: .9em;
+    display: block;
+    padding: 10px 36px 10px 18px;
+    color: #333;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.T-LogList li > a:hover,
+.T-LogList li > .active {
+    background-color: #ffd;
+}
+.T-LogList li > a > span {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: inline-block;
+    border-radius: 100%;
+    background-color: #999;
+    min-width: 2em;
+    min-height: 2em;
+    text-align: center;
+    color: #fff;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 10px;
+    box-sizing: border-box;
+    padding: 4px 8px;
+}
+.T-LogList li > a:hover > span,
+.T-LogList li > .active > span {
+    background-color: #c00;
+}
+.T-Content {
+    margin-left: 260px;
+    height: 100%;
+    overflow: auto;
+}
+.T-Log {
+    padding: 10px 18px;
+    line-height: 1.6;
+    border-bottom: dotted 1px #ccc;
+}
+.T-Log:hover {
+    background-color: #eee;
+}
+.T-Time {
+    font-size: .9em;;
+    margin-bottom: 4px;
+}
+.T-Time:before {
+    content: "[";
+    margin-right: 2px;
+}
+
+.T-Time:after {
+    content: "]";
+    margin-left: 2px;
+}
+

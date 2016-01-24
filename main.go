@@ -26,19 +26,21 @@ type AppHandler struct {
 // Implements http.Handler interface
 // Serving HTTP request, or upgrading to WebSocket by segment.
 func (a *AppHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
-	var handler websocket.Handler
-
 	switch req.URL.Path {
 	case "/remote":
 		a.handleRemoteRequest(resp, req)
 		return
+	case "/reader":
+		ws := websocket.Server{
+			Handler: createReader(a),
+		}
+		ws.ServeHTTP(resp, req)
 	//case "/proxy":
 	//	handler = createProxyClient(a)
 	default:
-		handler = createReader(a)
+		server := StaticServer{}
+		server.ServeHTTP(resp, req)
 	}
-	ws := websocket.Server{Handler: handler}
-	ws.ServeHTTP(resp, req)
 }
 
 // Accept remote messaging
