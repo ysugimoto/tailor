@@ -12,8 +12,8 @@ func createProxyClient(app *AppHandler) websocket.Handler {
 		c.OnClose = func() {
 			delete(app.connections, c.Id)
 		}
-		c.OnMessage = func(message string) {
-			app.Broadcast(message)
+		c.OnMessage = func(p Payload) {
+			app.Broadcast(p)
 		}
 
 		app.connections[c.Id] = c

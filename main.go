@@ -53,7 +53,10 @@ func (a *AppHandler) handleRemoteRequest(resp http.ResponseWriter, req *http.Req
 		resp.Write([]byte("Message is empty."))
 	} else {
 		fmt.Println("Message incoming", msg)
-		a.Broadcast(msg)
+		a.Broadcast(Payload{
+			Message: msg,
+			Host:    req.Form.Get("host"),
+		})
 		resp.WriteHeader(http.StatusOK)
 		resp.Write([]byte("Message has accepted."))
 	}
@@ -61,10 +64,10 @@ func (a *AppHandler) handleRemoteRequest(resp http.ResponseWriter, req *http.Req
 
 // Boardcast all websocket connections
 // cast message only READER type connection.
-func (a *AppHandler) Broadcast(line string) {
+func (a *AppHandler) Broadcast(p Payload) {
 	for _, c := range a.connections {
 		if c.Type == READER {
-			c.Send(line)
+			c.Send(p)
 		}
 	}
 }
@@ -106,11 +109,15 @@ func main() {
 
 	// read and cast from stdin
 	if _, ok := args.GetOption("stdin"); ok {
+		host, _ := os.Hostname()
 		fmt.Println("Read from stdin")
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			if r != nil {
-				r.Send(scanner.Text())
+				r.Send(Payload{
+					Message: scanner.Text(),
+					Host:    host,
+				})
 			} else {
 				os.Stdout.WriteString(scanner.Text() + "\n")
 			}
@@ -143,13 +150,15 @@ func main() {
 	if r != nil {
 		startTail(file, r.Send)
 	} else {
-		go startTail(file, app.Broadcast)
 		// serving HTTP
-		http.Handle("/", app)
-		port, _ := args.GetOptionAsInt("port")
-		if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
-			panic(err)
-		}
+		go func() {
+			http.Handle("/", app)
+			port, _ := args.GetOptionAsInt("port")
+			if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
+				panic(err)
+			}
+		}()
+		startTail(file, app.Broadcast)
 	}
 
 }
@@ -165,6 +174,7 @@ Usage:
 Options
   -p, --port        : Listen port number if works server
   -h, --help        : Show this help
+  -c, --client      : Reader client server
       --stdin       : Get data from stdin
       --proxy       : Send data to proxy server
       --proxy-server: Work with proxy-server`

@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+type Payload struct {
+	Message string `json:"message"`
+	Host    string `json:"host"`
+}
+
 const (
 	// READER type connection
 	READER = iota
@@ -32,7 +37,7 @@ type Connection struct {
 	OnClose func()
 
 	// Event handler of message incoming
-	OnMessage func(string)
+	OnMessage func(Payload)
 }
 
 // Create New connection
@@ -44,27 +49,29 @@ func NewConnection(connType int, conn *websocket.Conn) *Connection {
 		Id:        hex.EncodeToString(hash[:len(hash)]),
 		conn:      conn,
 		OnClose:   func() {},
-		OnMessage: func(message string) {},
+		OnMessage: func(p Payload) {},
 	}
 }
 
 // Send message to this connection
-func (c *Connection) Send(message string) {
-	if err := websocket.Message.Send(c.conn, message); err != nil {
-		fmt.Println("[Error]", "Send message for ID", c.Id, err.Error())
+func (c *Connection) Send(p Payload) {
+	if err := websocket.JSON.Send(c.conn, p); err != nil {
+		c.OnClose()
+		c.conn.Close()
+		//fmt.Println("[Error]", "Send message for ID", c.Id, err.Error())
 	} else {
-		fmt.Println("Sended", message)
 	}
 }
 
 // Connection polling
 func (c *Connection) Poll() {
 	for {
-		var msg string
-		if err := websocket.Message.Receive(c.conn, &msg); err == nil {
-			c.OnMessage(msg)
+		var p Payload
+		if err := websocket.JSON.Receive(c.conn, &p); err == nil {
+			c.OnMessage(p)
 		} else {
-			break
+			c.OnClose()
+			c.conn.Close()
 		}
 	}
 }

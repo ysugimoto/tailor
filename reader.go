@@ -13,7 +13,7 @@ func createReader(app *AppHandler) websocket.Handler {
 		c.OnClose = func() {
 			delete(app.connections, c.Id)
 		}
-		c.OnMessage = func(message string) {
+		c.OnMessage = func(p Payload) {
 			// noop
 		}
 

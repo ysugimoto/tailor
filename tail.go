@@ -8,25 +8,28 @@ import (
 
 // Tail library wrapper
 // this function should be called by goroutine
-func startTail(fileName string, readCallback func(string)) error {
-	if _, err := os.Stat(fileName); err != nil {
-		return err
-	}
-
+func startTail(fileName string, readCallback func(Payload)) error {
 	conf := tail.Config{
-		Follow: true,
-		Poll:   true,
-		Logger: tail.DiscardingLogger,
+		Location: &tail.SeekInfo{
+			Whence: os.SEEK_END,
+		},
+		Follow:    true,
+		Poll:      true,
+		MustExist: true,
+		Logger:    tail.DiscardingLogger,
 	}
 
 	host, _ := os.Hostname()
 	if t, err := tail.TailFile(fileName, conf); err != nil {
-		return err
+		fmt.Println("[ERROR]", err)
 	} else {
 		for line := range t.Lines {
-			msg := fmt.Sprintf("[%s] %s: %s", host, fileName, line.Text)
+			msg := fmt.Sprintf("%s: %s", fileName, line.Text)
 			fmt.Println(msg)
-			readCallback(msg)
+			readCallback(Payload{
+				Message: msg,
+				Host:    host,
+			})
 		}
 	}
 

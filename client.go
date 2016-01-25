@@ -14,7 +14,7 @@ type Client struct {
 
 // Create New Client
 func NewClient(clientHost string) (*Client, error) {
-	url := fmt.Sprintf("ws://%s", clientHost)
+	url := fmt.Sprintf("ws://%s/reader", clientHost)
 	origin := fmt.Sprintf("http://%s", clientHost)
 
 	if conn, err := websocket.Dial(url, "", origin); err != nil {
@@ -29,10 +29,11 @@ func NewClient(clientHost string) (*Client, error) {
 // Connection polling
 func (c *Client) Listen() {
 	for {
-		var msg string
-		if err := websocket.Message.Receive(c.conn, &msg); err == nil {
-			fmt.Println(msg)
+		var p Payload
+		if err := websocket.JSON.Receive(c.conn, &p); err == nil {
+			fmt.Println(p.Message)
 		} else {
+			c.conn.Close()
 			break
 		}
 	}
