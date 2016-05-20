@@ -11,7 +11,14 @@ import (
 	"golang.org/x/net/websocket"
 	"net/http"
 	"os"
+	"time"
 )
+
+var staticServer StaticServer
+
+func init() {
+	staticServer = StaticServer{}
+}
 
 // Application handler
 // Handle HTTP request, upgrading WebSocket request,
@@ -38,8 +45,7 @@ func (a *AppHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	//case "/proxy":
 	//	handler = createProxyClient(a)
 	default:
-		server := StaticServer{}
-		server.ServeHTTP(resp, req)
+		staticServer.ServeHTTP(resp, req)
 	}
 }
 
@@ -56,6 +62,7 @@ func (a *AppHandler) handleRemoteRequest(resp http.ResponseWriter, req *http.Req
 		a.Broadcast(Payload{
 			Message: msg,
 			Host:    req.Form.Get("host"),
+			Time:    req.Form.Get("time"),
 		})
 		resp.WriteHeader(http.StatusOK)
 		resp.Write([]byte("Message has accepted."))
@@ -117,6 +124,7 @@ func main() {
 				r.Send(Payload{
 					Message: scanner.Text(),
 					Host:    host,
+					Time:    time.Now().Format("2006-01-02 15:03:04"),
 				})
 			} else {
 				os.Stdout.WriteString(scanner.Text() + "\n")
@@ -169,7 +177,7 @@ func showUsage() {
 tailor: the realtime logging transporter
 ========================================
 Usage:
-  $ tailor [options] file
+  $ tailor [options] [file]
 
 Options
   -p, --port        : Listen port number if works server

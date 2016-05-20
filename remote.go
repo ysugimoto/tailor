@@ -37,6 +37,7 @@ func (r *Remote) Send(p Payload) {
 	post := url.Values{}
 	post.Set("message", p.Message)
 	post.Set("host", p.Host)
+	post.Set("time", p.Time)
 	request, _ := http.NewRequest(
 		"POST",
 		fmt.Sprintf("%s/remote", r.URL),

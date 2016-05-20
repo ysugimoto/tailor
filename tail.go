@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hpcloud/tail"
 	"os"
+	"time"
 )
 
 // Tail library wrapper
@@ -29,6 +30,7 @@ func startTail(fileName string, readCallback func(Payload)) error {
 			readCallback(Payload{
 				Message: msg,
 				Host:    host,
+				Time:    time.Now().Format("2006-01-02 15:03:04"),
 			})
 		}
 	}

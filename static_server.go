@@ -33,7 +33,7 @@ func (s StaticServer) FindStaticFile(path string) (info StaticResponse, err erro
 	if path == "/" {
 		path = "assets/index.html"
 	} else {
-		path = "assets/" + path
+		path = "assets" + path
 	}
 
 	info.Content, err = Asset(path)

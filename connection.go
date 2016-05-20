@@ -11,6 +11,7 @@ import (
 type Payload struct {
 	Message string `json:"message"`
 	Host    string `json:"host"`
+	Time    string `json:"time"`
 }
 
 const (
