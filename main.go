@@ -7,12 +7,17 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/sevlyar/go-daemon"
 	"github.com/ysugimoto/go-cliargs"
 	"golang.org/x/net/websocket"
+	"log"
 	"net/http"
 	"os"
+	"syscall"
 	"time"
 )
+
+type DaemonHandler func(*AppHandler, *cliarg.Arguments)
 
 var staticServer StaticServer
 
@@ -86,8 +91,10 @@ func main() {
 	args := cliarg.NewArguments()
 	args.Alias("s", "stdin", nil)
 	args.Alias("P", "proxy", "")
+	args.Alias("d", "daemon", nil)
 	args.Alias("p", "port", "9000")
 	args.Alias("", "proxy-server", nil)
+	args.Alias("", "kill", nil)
 	args.Alias("h", "help", nil)
 	args.Alias("c", "client", "")
 	args.Parse()
@@ -139,36 +146,89 @@ func main() {
 
 	// Run with proxy-server mode
 	if _, ok := args.GetOption("proxy-server"); ok {
-		http.Handle("/", app)
-		port, _ := args.GetOptionAsInt("port")
-		if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
-			panic(err)
-		}
-		return
-	}
-
-	// if command argument is nothing, show usage
-	if args.GetCommandSize() == 0 {
-		showUsage()
-		os.Exit(0)
-	}
-
-	// Tailing file
-	file, _ := args.GetCommandAt(1)
-	if r != nil {
-		startTail(file, r.Send)
-	} else {
-		// serving HTTP
-		go func() {
+		startDaemon(app, args, func(app *AppHandler, args *cliarg.Arguments) {
 			http.Handle("/", app)
 			port, _ := args.GetOptionAsInt("port")
 			if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
 				panic(err)
 			}
-		}()
-		startTail(file, app.Broadcast)
+		})
+		return
 	}
 
+	startDaemon(app, args, func(app *AppHandler, args *cliarg.Arguments) {
+		// if command argument is nothing, show usage
+		if args.GetCommandSize() == 0 {
+			showUsage()
+			os.Exit(0)
+		}
+
+		// Tailing file
+		file, _ := args.GetCommandAt(1)
+		if r != nil {
+			startTail(file, r.Send)
+		} else {
+			// serving HTTP
+			go func() {
+				http.Handle("/", app)
+				port, _ := args.GetOptionAsInt("port")
+				if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
+					panic(err)
+				}
+			}()
+			startTail(file, app.Broadcast)
+		}
+	})
+}
+
+func startDaemon(app *AppHandler, args *cliarg.Arguments, callback DaemonHandler) {
+	if _, ok := args.GetOption("daemon"); !ok {
+		if _, kok := args.GetOption("kill"); !kok {
+			callback(app, args)
+		}
+		return
+	}
+
+	_, kill := args.GetOption("kill")
+	daemon.AddCommand(daemon.BoolFlag(&kill), syscall.SIGTERM, handleDaemon)
+	daemon.AddCommand(daemon.BoolFlag(&kill), syscall.SIGKILL, handleDaemon)
+	dm := &daemon.Context{
+		PidFileName: "/tmp/tailor.pid",
+		PidFilePerm: 0644,
+		LogFileName: "/tmp/tailor.log",
+		LogFilePerm: 0664,
+		Umask:       027,
+	}
+
+	if len(daemon.ActiveFlags()) > 0 {
+		if cd, err := dm.Search(); err != nil {
+			log.Fatalln(err)
+		} else {
+			daemon.SendCommands(cd)
+		}
+		return
+	}
+
+	c, err := dm.Reborn()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if c != nil {
+		return
+	}
+	defer dm.Release()
+	go callback(app, args)
+
+	if err := daemon.ServeSignals(); err != nil {
+		log.Println(err)
+	}
+}
+
+func handleDaemon(sig os.Signal) error {
+	if sig == syscall.SIGTERM || sig == syscall.SIGKILL {
+		return daemon.ErrStop
+	}
+	return nil
 }
 
 // Show usage
@@ -182,6 +242,7 @@ Usage:
 Options
   -p, --port        : Listen port number if works server
   -h, --help        : Show this help
+  -d, --daemon      : Run with daemon
   -c, --client      : Reader client server
       --stdin       : Get data from stdin
       --proxy       : Send data to proxy server

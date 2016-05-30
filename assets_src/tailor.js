@@ -12,8 +12,7 @@ class Controller {
 
     init() {
         this.main = ReactDOM.render(<Main logs={this.logs} hostList={this.hosts}/>, this.element);
-        //this.ws   = new WebSocket(WEBSOCKET_URL);
-        this.ws   = new WebSocket("ws://localhost:9999/reader");
+        this.ws   = new WebSocket("ws://" + location.host + "/reader");
         this.ws.onopen = () => {
             this.main.setState({connected: true});
             this.ws.onmessage = (evt) => this.handleSocket(evt);

@@ -1,2 +1,4 @@
 build/tailor
 assets_src/node_modules/
+
+Godeps/_workspace

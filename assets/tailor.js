@@ -19380,8 +19380,7 @@ var Controller = (function () {
             var _this = this;
 
             this.main = _reactDom2["default"].render(_react2["default"].createElement(_modulesMain2["default"], { logs: this.logs, hostList: this.hosts }), this.element);
-            //this.ws   = new WebSocket(WEBSOCKET_URL);
-            this.ws = new WebSocket("ws://localhost:9999/reader");
+            this.ws = new WebSocket("ws://" + location.host + "/reader");
             this.ws.onopen = function () {
                 _this.main.setState({ connected: true });
                 _this.ws.onmessage = function (evt) {
