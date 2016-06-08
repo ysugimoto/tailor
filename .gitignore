@@ -1,4 +1,5 @@
 build/tailor
+build/*.tar.gz
 assets_src/node_modules/
 
 Godeps/_workspace

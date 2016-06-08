@@ -2,13 +2,15 @@ import React from "react";
 import Indicator from "./indicator";
 import LogFileList from "./log_file_list";
 import LogContent from "./log_content";
+import WindowMode from "./WindowMode";
 
 export default class Main extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             selectedHost: "",
-            connected: false
+            connected: false,
+            windowMode: 1
         };
     }
 
@@ -17,6 +19,10 @@ export default class Main extends React.Component {
             host = "";
         }
         this.setState({selectedHost: host});
+    }
+
+    handleChangeWindowMode(mode) {
+        this.setState({windowMode: mode});
     }
 
     flushLog() {
@@ -39,16 +45,44 @@ export default class Main extends React.Component {
             }
         }
 
+        let content = "";
+        switch ( this.state.windowMode ) {
+            case 1:
+                content = (
+                    <div className="T-Main">
+                        <LogFileList hosts={hosts} selectedHost={this.state.selectedHost} onSelectHost={this.handleSelectHost.bind(this)} />
+                        <LogContent logs={logs} flushLog={this.flushLog.bind(this)}/>
+                    </div>
+                );
+            break;
+            case 2:
+                content = (
+                    <div className="T-Main T-Main--split2">
+                        <SplitWindow hosts={hosts} logs={this.props.logs} />
+                        <SplitWindow hosts={hosts} logs={this.props.logs} />
+                    </div>
+                );
+            break;
+            case 3:
+                content = (
+                    <div className="T-Main T-Main--split4">
+                        <SplitWindow hosts={hosts} logs={this.props.logs} />
+                        <SplitWindow hosts={hosts} logs={this.props.logs} />
+                        <SplitWindow hosts={hosts} logs={this.props.logs} />
+                        <SplitWindow hosts={hosts} logs={this.props.logs} />
+                    </div>
+                );
+            break;
+        }
+
         return (
             <div className="T-Window">
                 <div className="T-Header">
                     <h1 className="T-Title">Tailor</h1>
+                    <WindowMode selected={this.state.windowMode} handler={this.handleChangeWindowMode.bind(this)}/>
                     <Indicator connected={this.state.connected} />
                 </div>
-                <div className="T-Main">
-                    <LogFileList hosts={hosts} selectedHost={this.state.selectedHost} onSelectHost={this.handleSelectHost.bind(this)} />
-                    <LogContent logs={logs} flushLog={this.flushLog.bind(this)}/>
-                </div>
+                {content}
             </div>
         );
     }

@@ -185,8 +185,8 @@ func startDaemon(app *AppHandler, args *cliarg.Arguments, callback DaemonHandler
 	if _, ok := args.GetOption("daemon"); !ok {
 		if _, kok := args.GetOption("kill"); !kok {
 			callback(app, args)
+			return
 		}
-		return
 	}
 
 	_, kill := args.GetOption("kill")
