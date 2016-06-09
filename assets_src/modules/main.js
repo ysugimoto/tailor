@@ -2,7 +2,8 @@ import React from "react";
 import Indicator from "./indicator";
 import LogFileList from "./log_file_list";
 import LogContent from "./log_content";
-import WindowMode from "./WindowMode";
+import WindowMode from "./window_mode";
+import SplitWindow from "./split_window";
 
 export default class Main extends React.Component {
     constructor(props) {
@@ -33,21 +34,22 @@ export default class Main extends React.Component {
     }
 
     render() {
-        let logs = [];
         const hosts = Object.keys(this.props.logs);
-
-        if ( this.state.selectedHost && this.state.selectedHost in this.props.logs ) {
-            logs = this.props.logs[this.state.selectedHost];
-        } else {
-            if ( hosts.length > 0 ) {
-                logs = this.props.logs[hosts[0]];
-                this.state.selectedHost = hosts[0];
-            }
-        }
-
         let content = "";
+
         switch ( this.state.windowMode ) {
             case 1:
+                let logs = [];
+
+                if ( this.state.selectedHost && this.state.selectedHost in this.props.logs ) {
+                    logs = this.props.logs[this.state.selectedHost];
+                } else {
+                    if ( hosts.length > 0 ) {
+                        logs = this.props.logs[hosts[0]];
+                        this.state.selectedHost = hosts[0];
+                    }
+                }
+
                 content = (
                     <div className="T-Main">
                         <LogFileList hosts={hosts} selectedHost={this.state.selectedHost} onSelectHost={this.handleSelectHost.bind(this)} />
@@ -57,7 +59,7 @@ export default class Main extends React.Component {
             break;
             case 2:
                 content = (
-                    <div className="T-Main T-Main--split2">
+                    <div className="T-Main T-Main--splitV">
                         <SplitWindow hosts={hosts} logs={this.props.logs} />
                         <SplitWindow hosts={hosts} logs={this.props.logs} />
                     </div>
@@ -65,7 +67,7 @@ export default class Main extends React.Component {
             break;
             case 3:
                 content = (
-                    <div className="T-Main T-Main--split4">
+                    <div className="T-Main T-Main--splitS">
                         <SplitWindow hosts={hosts} logs={this.props.logs} />
                         <SplitWindow hosts={hosts} logs={this.props.logs} />
                         <SplitWindow hosts={hosts} logs={this.props.logs} />

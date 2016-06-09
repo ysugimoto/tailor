@@ -1,0 +1,36 @@
+{
+	"ImportPath": "github.com/ysugimoto/tailor",
+	"GoVersion": "go1.5",
+	"Deps": [
+		{
+			"ImportPath": "github.com/hpcloud/tail",
+			"Comment": "v0-35-g272d489",
+			"Rev": "272d489eea7d84319e02b73eec2bfa88fd243ed0"
+		},
+		{
+			"ImportPath": "github.com/kardianos/osext",
+			"Rev": "29ae4ffbc9a6fe9fb2bc5029050ce6996ea1d3bc"
+		},
+		{
+			"ImportPath": "github.com/sevlyar/go-daemon",
+			"Rev": "3bf5e993af87194518e81cf9a81c1c53190a8911"
+		},
+		{
+			"ImportPath": "github.com/ysugimoto/go-cliargs",
+			"Rev": "c93ec4a7a833f6d907868cbaf82fb271d39fe3e9"
+		},
+		{
+			"ImportPath": "golang.org/x/net/websocket",
+			"Rev": "d5cd7348bfebdf7dbb6dbb18fa488525f9024293"
+		},
+		{
+			"ImportPath": "gopkg.in/fsnotify.v1",
+			"Comment": "v1.2.9",
+			"Rev": "8611c35ab31c1c28aa903d33cf8b6e44a399b09e"
+		},
+		{
+			"ImportPath": "gopkg.in/tomb.v1",
+			"Rev": "dd632973f1e7218eb1089048e0798ec9ae7dceb8"
+		}
+	]
+}

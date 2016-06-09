@@ -57,20 +57,33 @@ func (a *AppHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 // Accept remote messaging
 // Need to POST request, and message field.
 func (a *AppHandler) handleRemoteRequest(resp http.ResponseWriter, req *http.Request) {
-	resp.Header().Add("Content-Type", "text/plain")
-	req.ParseForm()
-	if msg := req.Form.Get("message"); msg == "" {
-		resp.WriteHeader(http.StatusNotFound)
-		resp.Write([]byte("Message is empty."))
-	} else {
-		fmt.Println("Message incoming", msg)
-		a.Broadcast(Payload{
-			Message: msg,
-			Host:    req.Form.Get("host"),
-			Time:    req.Form.Get("time"),
-		})
-		resp.WriteHeader(http.StatusOK)
-		resp.Write([]byte("Message has accepted."))
+	switch req.Method {
+	case "OPTIONS":
+		resp.Header().Set("Access-Control-Allow-Origin", "*")
+		resp.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
+		resp.Header().Set("Access-Control-Allow-Headers", "X-Requested-With")
+		resp.WriteHeader(http.StatusNoContent)
+	case "POST":
+		resp.Header().Add("Content-Type", "text/plain")
+		req.ParseForm()
+		if msg := req.Form.Get("message"); msg == "" {
+			resp.WriteHeader(http.StatusNotFound)
+			resp.Write([]byte("Message is empty."))
+		} else {
+			fmt.Println("Message incoming", msg)
+			a.Broadcast(Payload{
+				Message: msg,
+				Host:    req.Form.Get("host"),
+				Time:    req.Form.Get("time"),
+			})
+			resp.Header().Set("Access-Control-Allow-Origin", "*")
+			resp.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
+			resp.Header().Set("Access-Control-Allow-Headers", "X-Requested-With")
+			resp.WriteHeader(http.StatusOK)
+			resp.Write([]byte("Message has accepted."))
+		}
+	default:
+		resp.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }
 

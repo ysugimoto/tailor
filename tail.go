@@ -41,7 +41,7 @@ func startTail(fileName string, readCallback func(Payload)) error {
 				}
 			}
 		}()
-		timer := time.NewTicker(5 * time.Second)
+		timer := time.NewTicker(2 * time.Second)
 		for {
 			select {
 			case <-timer.C:
