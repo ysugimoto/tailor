@@ -75,6 +75,10 @@ body, h1, p, ul, li {
     display: table;
     clear: both;
 }
+.T-Main--splitV .T-SplitWindow,
+.T-Main--splitS .T-SplitWindow {
+    position: relative;
+}
 .T-Main--splitV .T-SplitWindow {
     float: left;
     width: 50%;
@@ -99,9 +103,23 @@ body, h1, p, ul, li {
     text-align: center;
     box-sizing: border-box;
     padding: 8px 0;
+    position: relative;
+    z-index: 3;
 }
 .T-SplitWindow .T-Content {
     margin-left: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding-top: 30px;
+}
+.T-SplitWindow .T-Content pre {
+    padding: 4px 10px;
+}
+.T-SplitWindow .T-Content .T-Log--erase {
+    display: none;
 }
 .T-Sidebar {
     height: 100%;

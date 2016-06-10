@@ -63,6 +63,7 @@ func (a *AppHandler) handleRemoteRequest(resp http.ResponseWriter, req *http.Req
 		resp.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
 		resp.Header().Set("Access-Control-Allow-Headers", "X-Requested-With")
 		resp.WriteHeader(http.StatusNoContent)
+		resp.Write([]byte(""))
 	case "POST":
 		resp.Header().Add("Content-Type", "text/plain")
 		req.ParseForm()
@@ -84,6 +85,7 @@ func (a *AppHandler) handleRemoteRequest(resp http.ResponseWriter, req *http.Req
 		}
 	default:
 		resp.WriteHeader(http.StatusMethodNotAllowed)
+		resp.Write([]byte("Method Not Allowed."))
 	}
 }
 
@@ -102,14 +104,15 @@ func (a *AppHandler) Broadcast(p Payload) {
 // and switch working mode
 func main() {
 	args := cliarg.NewArguments()
-	args.Alias("s", "stdin", nil)
-	args.Alias("P", "proxy", "")
-	args.Alias("d", "daemon", nil)
 	args.Alias("p", "port", "9000")
-	args.Alias("", "proxy-server", nil)
-	args.Alias("", "kill", nil)
-	args.Alias("h", "help", nil)
+	args.Alias("h", "host", "0.0.0.0")
+	args.Alias("d", "daemon", nil)
+	args.Alias("R", "remote", "")
+	args.Alias("C", "central", nil)
+	args.Alias("k", "kill", nil)
 	args.Alias("c", "client", "")
+	args.Alias("s", "stdin", nil)
+	args.Alias("", "help", nil)
 	args.Parse()
 
 	// if help flag supplied, show usage
@@ -130,8 +133,8 @@ func main() {
 
 	// Create remote object if proxy option supplied
 	var r *Remote
-	if proxy, _ := args.GetOptionAsString("proxy"); proxy != "" {
-		r = &Remote{URL: proxy}
+	if remote, _ := args.GetOptionAsString("remote"); remote != "" {
+		r = &Remote{URL: remote}
 	}
 
 	// read and cast from stdin
@@ -158,11 +161,12 @@ func main() {
 	}
 
 	// Run with proxy-server mode
-	if _, ok := args.GetOption("proxy-server"); ok {
+	if _, ok := args.GetOption("central"); ok {
 		startDaemon(app, args, func(app *AppHandler, args *cliarg.Arguments) {
 			http.Handle("/", app)
 			port, _ := args.GetOptionAsInt("port")
-			if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
+			host, _ := args.GetOptionAsString("host")
+			if err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), nil); err != nil {
 				panic(err)
 			}
 		})
@@ -185,7 +189,8 @@ func main() {
 			go func() {
 				http.Handle("/", app)
 				port, _ := args.GetOptionAsInt("port")
-				if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
+				host, _ := args.GetOptionAsString("host")
+				if err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), nil); err != nil {
 					panic(err)
 				}
 			}()
@@ -253,12 +258,14 @@ Usage:
   $ tailor [options] [file]
 
 Options
-  -p, --port        : Listen port number if works server
-  -h, --help        : Show this help
+  -p, --port        : Determine listen port number
+  -h, --host        : Determine listen host address
   -d, --daemon      : Run with daemon
-  -c, --client      : Reader client server
+  -R, --remote      : Determine remote central server address
+  -C, --central     : Work on central server mode
+  -k, --kill        : Kill the daemon process
+  -c, --client      : Work on reader client
       --stdin       : Get data from stdin
-      --proxy       : Send data to proxy server
-      --proxy-server: Work with proxy-server`
+      --help        : Show this help`
 	fmt.Println(help)
 }
