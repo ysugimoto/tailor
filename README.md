@@ -53,7 +53,7 @@ Central server accepts data on HTTP interface with CORS. In this sample case, en
 Second, Execute tail data and transporting process at web servers you want to watch:
 
 ```
-$ tailor [-d] -P http://example.com:9000 /var/log/httpd/access_log
+$ tailor [-d] -R http://example.com:9000 /var/log/httpd/access_log
 ```
 
 If you want to run with daemon, add `-d` option.
@@ -85,7 +85,7 @@ You can see logs that classified by host, one, two, four splitted panes.
 | -p, --port      | Change listen port.                                          | 9000      |
 | -h, --host      | Change listen host.                                          | 0.0.0.0   |
 | -C, --central   | Run with centran server mode.                                | -         |
-| -t, --transport | Run with tansport mode. Determine central server's full URI. | -         |
+| -R, --remote    | Run with remote mode. Determine central server's full URI.   | -         |
 | -d, --daemon    | Run with daemon.                                             | -         |
 | -c, --client    | Run with client mode.                                        | -         |
 | -k, --kill      | Kill the daemon process.                                     | -         |
