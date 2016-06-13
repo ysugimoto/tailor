@@ -86,7 +86,7 @@ func assetsIndexHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/index.html", size: 421, mode: os.FileMode(420), modTime: time.Unix(1465545338, 0)}
+	info := bindataFileInfo{name: "assets/index.html", size: 421, mode: os.FileMode(420), modTime: time.Unix(1465795809, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -106,7 +106,7 @@ func assetsTailorCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/tailor.css", size: 2863, mode: os.FileMode(420), modTime: time.Unix(1465545338, 0)}
+	info := bindataFileInfo{name: "assets/tailor.css", size: 2863, mode: os.FileMode(420), modTime: time.Unix(1465795809, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -126,7 +126,7 @@ func assetsTailorJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/tailor.js", size: 709150, mode: os.FileMode(420), modTime: time.Unix(1465545335, 0)}
+	info := bindataFileInfo{name: "assets/tailor.js", size: 709150, mode: os.FileMode(420), modTime: time.Unix(1465795806, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -146,7 +146,7 @@ func assetsTailorMinJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/tailor.min.js", size: 367617, mode: os.FileMode(420), modTime: time.Unix(1465545337, 0)}
+	info := bindataFileInfo{name: "assets/tailor.min.js", size: 367617, mode: os.FileMode(420), modTime: time.Unix(1465795808, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

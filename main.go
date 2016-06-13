@@ -185,15 +185,6 @@ func main() {
 		if r != nil {
 			startTail(file, r.Send)
 		} else {
-			// serving HTTP
-			go func() {
-				http.Handle("/", app)
-				port, _ := args.GetOptionAsInt("port")
-				host, _ := args.GetOptionAsString("host")
-				if err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), nil); err != nil {
-					panic(err)
-				}
-			}()
 			startTail(file, app.Broadcast)
 		}
 	})

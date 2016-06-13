@@ -31,6 +31,7 @@ func startTail(fileName string, readCallback func(Payload)) error {
 	} else {
 		go func() {
 			for line := range t.Lines {
+				fmt.Println(line.Text)
 				lines := appendStack(line.Text)
 				if lines > 5 {
 					readCallback(Payload{
